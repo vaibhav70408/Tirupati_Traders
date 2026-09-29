@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tirupati Traders — App Prototype</title>
+<style>
+  :root{
+    --saffron:#F57C00;
+    --saffron-dark:#E8620A;
+    --green:#2E7D32;
+    --green-light:#E7F3E8;
+    --cream:#FFF8F0;
+    --ink:#22252A;
+    --muted:#7A8290;
+    --line:#ECE6DD;
+    --card:#ffffff;
+    --shadow:0 10px 30px rgba(0,0,0,.10);
+    --radius:22px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;}
+  body{background:linear-gradient(160deg,#fbece0,#f6f3ee 40%,#e9f3ea);color:var(--ink);padding:0 0 60px;}
+
+  /* Top header */
+  header.site{
+    position:sticky;top:0;z-index:50;
+    background:linear-gradient(90deg,var(--saffron),var(--saffron-dark));
+    color:#fff;padding:18px 24px;box-shadow:0 4px 18px rgba(0,0,0,.15);
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand .logo{
+    width:52px;height:52px;border-radius:14px;background:#fff;color:var(--saffron-dark);
+    display:grid;place-items:center;font-weight:800;font-size:22px;box-shadow:var(--shadow);
+  }
+  .brand h1{font-size:22px;letter-spacing:.3px;}
+  .brand p{font-size:12.5px;opacity:.92;font-weight:500;}
+
+  .tabs{display:flex;background:rgba(255,255,255,.18);padding:5px;border-radius:14px;gap:4px;}
+  .tabs button{
+    border:0;background:transparent;color:#fff;padding:10px 20px;border-radius:10px;
+    font-size:14px;font-weight:600;cursor:pointer;transition:.2s;
+  }
+  .tabs button.active{background:#fff;color:var(--saffron-dark);box-shadow:var(--shadow);}
+
+  .intro{max-width:1180px;margin:26px auto 6px;padding:0 24px;}
+  .intro h2{font-size:20px;margin-bottom:6px;}
+  .intro p{color:var(--muted);font-size:14px;max-width:760px;line-height:1.5;}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;}
+  .legend span{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+  .dot{width:11px;height:11px;border-radius:50%;}
+
+  /* Phone grid */
+  .flow{max-width:1240px;margin:10px auto;padding:14px 24px;display:none;}
+  .flow.active{display:block;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:34px 30px;justify-items:center;}
+
+  .stage{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .stage .step-tag{
+    font-size:12px;font-weight:700;color:var(--saffron-dark);background:#fff;border:1px solid var(--line);
+    padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px rgba(0,0,0,.05);
+  }
+
+  /* Phone frame */
+  .phone{
+    width:300px;height:620px;background:#0d0f12;border-radius:40px;padding:11px;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .phone .notch{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:120px;height:22px;background:#0d0f12;border-radius:0 0 16px 16px;z-index:5;
+  }
+  .screen{
+    width:100%;height:100%;background:var(--cream);border-radius:30px;overflow:hidden;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .statusbar{
+    height:34px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px 0 22px;font-size:11px;font-weight:600;color:var(--ink);flex-shrink:0;
+  }
+  .statusbar .r{display:flex;gap:6px;align-items:center;}
+
+  /* App top bar inside screen */
+  .appbar{
+    background:linear-gradient(90deg,var(--saffron),var(--saffron-dark));color:#fff;
+    padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .appbar.plain{background:#fff;color:var(--ink);border-bottom:1px solid var(--line);}
+  .appbar .ttl{font-size:15px;font-weight:700;flex:1;}
+  .appbar .sub{font-size:11px;opacity:.9;font-weight:500;}
+  .icon-btn{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:15px;}
+  .appbar.plain .icon-btn{background:var(--cream);}
+
+  .body{flex:1;overflow:hidden;padding:14px;display:flex;flex-direction:column;gap:12px;}
+  .body.scroll{overflow-y:auto;}
+  .body::-webkit-scrollbar{width:0;}
+
+  /* Reusable UI bits */
+  .search{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 13px;font-size:12.5px;color:var(--muted);}
+  .cats{display:flex;gap:8px;overflow-x:auto;}
+  .chip{white-space:nowrap;font-size:11.5px;font-weight:600;padding:8px 13px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--ink);}
+  .chip.on{background:var(--saffron);border-color:var(--saffron);color:#fff;}
+
+  .banner{background:linear-gradient(120deg,var(--green),#43a047);color:#fff;border-radius:16px;padding:14px 16px;}
+  .banner b{font-size:14px;}
+  .banner p{font-size:11px;opacity:.92;margin-top:3px;}
+
+  .prod{background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px;display:flex;gap:11px;align-items:center;}
+  .prod .thumb{width:52px;height:52px;border-radius:12px;background:var(--green-light);display:grid;place-items:center;font-size:24px;flex-shrink:0;}
+  .prod .info{flex:1;min-width:0;}
+  .prod .info h4{font-size:13px;}
+  .prod .info small{font-size:10.5px;color:var(--muted);}
+  .prod .price{font-size:13px;font-weight:800;color:var(--ink);}
+  .add-btn{background:var(--saffron);color:#fff;border:0;border-radius:10px;padding:7px 13px;font-size:12px;font-weight:700;}
+  .qty{display:flex;align-items:center;gap:9px;background:var(--saffron);border-radius:10px;color:#fff;padding:5px 8px;font-weight:700;font-size:13px;}
+  .qty span{width:16px;text-align:center;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+  .pcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;}
+  .pcard .thumb{width:100%;height:74px;border-radius:12px;background:var(--green-light);display:grid;place-items:center;font-size:34px;margin-bottom:9px;}
+  .pcard h4{font-size:12.5px;}
+  .pcard small{font-size:10px;color:var(--muted);display:block;margin:2px 0 8px;}
+  .pcard .row{display:flex;align-items:center;justify-content:space-between;}
+  .oos{opacity:.55;}
+  .badge-oos{font-size:9px;font-weight:700;color:#c62828;background:#fdecec;padding:3px 7px;border-radius:8px;}
+
+  /* Bottom nav */
+  .bottomnav{display:flex;justify-content:space-around;padding:10px 6px 12px;background:#fff;border-top:1px solid var(--line);flex-shrink:0;}
+  .bottomnav div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--muted);font-weight:600;}
+  .bottomnav div.on{color:var(--saffron-dark);}
+  .bottomnav .ic{font-size:17px;}
+
+  .btn{display:block;width:100%;text-align:center;background:var(--saffron);color:#fff;border:0;border-radius:14px;padding:14px;font-size:14px;font-weight:700;box-shadow:0 6px 16px rgba(245,124,0,.3);}
+  .btn.green{background:var(--green);box-shadow:0 6px 16px rgba(46,125,50,.3);}
+  .btn.ghost{background:#fff;color:var(--saffron-dark);border:1.5px solid var(--saffron);box-shadow:none;}
+  .btn.dark{background:var(--ink);box-shadow:none;}
+
+  .field{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;font-size:12.5px;color:var(--ink);}
+  .field .lab{font-size:10px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;}
+  .label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+
+  .otpboxes{display:flex;gap:9px;justify-content:center;}
+  .otpboxes div{width:42px;height:50px;border:1.5px solid var(--line);border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;background:#fff;}
+  .otpboxes div.fill{border-color:var(--saffron);color:var(--saffron-dark);}
+
+  .logo-big{width:82px;height:82px;border-radius:22px;background:linear-gradient(135deg,var(--saffron),var(--saffron-dark));color:#fff;display:grid;place-items:center;font-size:36px;font-weight:800;box-shadow:var(--shadow);margin:0 auto;}
+
+  .line-item{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--line);}
+  .line-item.total{border:0;font-weight:800;font-size:15px;padding-top:11px;}
+  .opt{display:flex;align-items:center;gap:11px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px;font-size:13px;font-weight:600;}
+  .opt.sel{border-color:var(--saffron);background:#fff6ee;}
+  .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;}
+  .opt.sel .radio{border-color:var(--saffron);background:radial-gradient(var(--saffron) 42%,#fff 46%);}
+
+  .steps{display:flex;flex-direction:column;gap:0;}
+  .stepline{display:flex;gap:12px;}
+  .stepline .marks{display:flex;flex-direction:column;align-items:center;}
+  .stepline .m{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--green);color:#fff;}
+  .stepline .m.pending{background:#fff;border:2px solid var(--line);color:var(--muted);}
+  .stepline .bar{width:2px;flex:1;background:var(--green);min-height:26px;}
+  .stepline .bar.pending{background:var(--line);}
+  .stepline .txt{padding-bottom:20px;}
+  .stepline .txt h5{font-size:13px;}
+  .stepline .txt small{font-size:10.5px;color:var(--muted);}
+
+  .upload-zone{border:2px dashed var(--saffron);border-radius:18px;background:#fff6ee;padding:26px 14px;text-align:center;}
+  .upload-zone .big{font-size:40px;}
+  .note-img{width:100%;height:150px;border-radius:14px;background:repeating-linear-gradient(#fff,#fff 22px,#eef4f9 23px);border:1px solid var(--line);padding:14px;font-family:'Comic Sans MS',cursive;font-size:13px;color:#33475b;line-height:23px;}
+
+  /* Admin specifics */
+  .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;}
+  .stat b{font-size:22px;display:block;}
+  .stat small{font-size:10.5px;color:var(--muted);}
+  .newtag{font-size:9px;font-weight:800;color:#fff;background:#e53935;padding:3px 8px;border-radius:20px;}
+  .order-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;}
+  .order-card .top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .order-card h4{font-size:13.5px;}
+  .order-card small{font-size:10.5px;color:var(--muted);}
+  .pill{font-size:9.5px;font-weight:700;padding:4px 9px;border-radius:20px;}
+  .pill.pend{background:#fff3e0;color:#e65100;}
+  .pill.appr{background:var(--green-light);color:var(--green);}
+  .pill.deliv{background:#e3f2fd;color:#1565c0;}
+
+  .adm-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.5px;}
+  .adm-item .qtybox{margin-left:auto;display:flex;align-items:center;gap:7px;}
+  .adm-item input{width:52px;border:1px solid var(--line);border-radius:8px;padding:6px;font-size:12px;text-align:center;}
+  .check{width:20px;height:20px;border-radius:6px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;flex-shrink:0;}
+  .check.off{background:#fff;border:2px solid var(--line);color:transparent;}
+
+  .toggle{width:42px;height:24px;border-radius:20px;background:var(--green);position:relative;flex-shrink:0;}
+  .toggle::after{content:"";position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:#fff;}
+  .toggle.off{background:#cfd3da;}
+  .toggle.off::after{right:auto;left:3px;}
+
+  footer{max-width:1180px;margin:30px auto 0;padding:0 24px;color:var(--muted);font-size:12.5px;text-align:center;line-height:1.6;}
+  @media(max-width:520px){.brand h1{font-size:18px;}.phone{transform:scale(.95);}}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">
+    <div class="logo">TT</div>
+    <div>
+      <h1>Tirupati Traders</h1>
+      <p>Provision / Kirana Store &nbsp;•&nbsp; App Prototype</p>
+    </div>
+  </div>
+  <div class="tabs">
+    <button id="tab-cust" class="active" onclick="showFlow('cust')">Customer App</button>
+    <button id="tab-admin" onclick="showFlow('admin')">Admin App</button>
+  </div>
+</header>
+
+<!-- ================= CUSTOMER FLOW ================= -->
+<section class="flow active" id="flow-cust">
+  <div class="intro">
+    <h2>Customer Journey — end to end</h2>
+    <p>This is what your customers see: login, browse products, add to cart, upload a handwritten list, choose delivery or pickup, pay by UPI or cash, and track the order.</p>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--saffron)"></i>Primary action</span>
+      <span><i class="dot" style="background:var(--green)"></i>Success / confirm</span>
+      <span><i class="dot" style="background:var(--line)"></i>Pending step</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1. LOGIN -->
+    <div class="stage">
+      <div class="step-tag">1 · Login with phone</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ &nbsp;5G &nbsp;100%</span></div>
+        <div class="body" style="justify-content:center;text-align:center;gap:18px;">
+          <div class="logo-big">TT</div>
+          <div>
+            <h2 style="font-size:20px;">Tirupati Traders</h2>
+            <p style="color:var(--muted);font-size:12.5px;margin-top:4px;">Your neighbourhood kirana, now online</p>
+          </div>
+          <div class="field" style="text-align:left;">
+            <span class="lab">MOBILE NUMBER</span>
+            <div style="display:flex;gap:8px;font-weight:700;"><span>+91</span><span style="color:var(--ink)">98765 43210</span></div>
+          </div>
+          <button class="btn">Send OTP</button>
+          <p style="font-size:10.5px;color:var(--muted);">By continuing you agree to our Terms &amp; Privacy Policy</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 2. OTP -->
+    <div class="stage">
+      <div class="step-tag">2 · Verify OTP</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">Verify Number</div></div>
+        <div class="body" style="gap:20px;">
+          <p style="font-size:13px;color:var(--muted);">Enter the 6-digit code sent to<br><b style="color:var(--ink)">+91 98765 43210</b></p>
+          <div class="otpboxes">
+            <div class="fill">4</div><div class="fill">7</div><div class="fill">2</div>
+            <div class="fill">9</div><div>_</div><div>_</div>
+          </div>
+          <p style="font-size:12px;color:var(--muted);text-align:center;">Resend code in <b style="color:var(--saffron-dark)">0:24</b></p>
+          <button class="btn green">Verify &amp; Continue</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 3. HOME / CATALOG -->
+    <div class="stage">
+      <div class="step-tag">3 · Home &amp; Catalog</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar">
+          <div><div class="sub">Deliver to · Home</div><div class="ttl">Namaste, Ramesh 👋</div></div>
+          <div class="icon-btn" style="margin-left:auto;">🔔</div>
+        </div>
+        <div class="body scroll">
+          <div class="search">🔍 Search dal, rice, spices…</div>
+          <div class="banner"><b>Monthly Ration Made Easy</b><p>Reorder last month's list in one tap</p></div>
+          <div class="cats">
+            <div class="chip on">All</div><div class="chip">Dal</div><div class="chip">Rice</div><div class="chip">Spices</div><div class="chip">Oil</div>
+          </div>
+          <div class="grid2">
+            <div class="pcard"><div class="thumb">🫘</div><h4>Toor Dal</h4><small>1 kg · Premium</small><div class="row"><span class="price">₹145</span><button class="add-btn">ADD</button></div></div>
+            <div class="pcard"><div class="thumb">🌾</div><h4>Basmati Rice</h4><small>5 kg bag</small><div class="row"><span class="price">₹520</span><button class="add-btn">ADD</button></div></div>
+            <div class="pcard"><div class="thumb">🧂</div><h4>Rock Salt</h4><small>1 kg</small><div class="row"><span class="price">₹28</span><button class="add-btn">ADD</button></div></div>
+            <div class="pcard oos"><div class="thumb">🛢️</div><h4>Mustard Oil</h4><small>1 L</small><div class="row"><span class="badge-oos">OUT OF STOCK</span></div></div>
+          </div>
+        </div>
+        <div class="bottomnav">
+          <div class="on"><span class="ic">🏠</span>Home</div>
+          <div><span class="ic">📋</span>Orders</div>
+          <div><span class="ic">📸</span>Upload List</div>
+          <div><span class="ic">🛒</span>Cart</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 4. CART -->
+    <div class="stage">
+      <div class="step-tag">4 · Cart</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">My Cart (3)</div></div>
+        <div class="body scroll">
+          <div class="prod"><div class="thumb">🫘</div><div class="info"><h4>Toor Dal</h4><small>1 kg × 2</small></div><div class="qty">−<span>2</span>+</div></div>
+          <div class="prod"><div class="thumb">🌾</div><div class="info"><h4>Basmati Rice</h4><small>5 kg × 1</small></div><div class="qty">−<span>1</span>+</div></div>
+          <div class="prod"><div class="thumb">🧂</div><div class="info"><h4>Rock Salt</h4><small>1 kg × 1</small></div><div class="qty">−<span>1</span>+</div></div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;">
+            <div class="line-item"><span>Item total</span><span>₹838</span></div>
+            <div class="line-item"><span>Delivery</span><span style="color:var(--green)">Free</span></div>
+            <div class="line-item total"><span>To pay*</span><span>₹838</span></div>
+            <small style="color:var(--muted);font-size:10px;">*Final price confirmed by shop after weighing loose items</small>
+          </div>
+        </div>
+        <div style="padding:12px;background:#fff;border-top:1px solid var(--line);"><button class="btn">Proceed to Checkout →</button></div>
+      </div></div>
+    </div>
+
+    <!-- 5. UPLOAD LIST -->
+    <div class="stage">
+      <div class="step-tag">5 · Upload handwritten list</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">Upload Your List</div></div>
+        <div class="body scroll" style="gap:14px;">
+          <p style="font-size:12.5px;color:var(--muted);">Take a photo of your handwritten list. Our shop will read it and prepare your order.</p>
+          <div class="note-img">Toor dal – 2 kg<br>Chawal – 5 kg<br>Chini – 1 kg<br>Chai patti – 250 g<br>Haldi – 100 g</div>
+          <div class="upload-zone"><div class="big">📷</div><b style="font-size:13px;">Take Photo / Upload</b><p style="font-size:11px;color:var(--muted);margin-top:4px;">JPG or PNG · up to 5 MB</p></div>
+          <div class="field"><span class="lab">NOTE FOR SHOP (optional)</span><span>Please give fresh toor dal 🙏</span></div>
+          <button class="btn">Send List to Shop →</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 6. CHECKOUT -->
+    <div class="stage">
+      <div class="step-tag">6 · Delivery &amp; Payment</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">Checkout</div></div>
+        <div class="body scroll" style="gap:13px;">
+          <div class="label">Delivery Method</div>
+          <div class="opt sel"><div class="radio"></div><div>🚚 Home Delivery<br><small style="color:var(--muted);font-weight:500;">Today, 5–7 PM · Free above ₹500</small></div></div>
+          <div class="opt"><div class="radio"></div><div>🏪 Pickup from Shop<br><small style="color:var(--muted);font-weight:500;">Ready in 30 min</small></div></div>
+          <div class="label">Payment Method</div>
+          <div class="opt sel"><div class="radio"></div><div>📲 UPI (GPay / PhonePe / Paytm)</div></div>
+          <div class="opt"><div class="radio"></div><div>💵 Cash on Delivery</div></div>
+          <button class="btn green">Place Order · ₹838</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 7. ORDER PLACED -->
+    <div class="stage">
+      <div class="step-tag">7 · Order placed</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="body" style="justify-content:center;text-align:center;gap:16px;">
+          <div style="width:90px;height:90px;border-radius:50%;background:var(--green-light);display:grid;place-items:center;font-size:46px;margin:0 auto;">✅</div>
+          <h2 style="font-size:20px;">Order Placed!</h2>
+          <p style="font-size:12.5px;color:var(--muted);">Order <b style="color:var(--ink)">#TT1042</b> sent to Tirupati Traders. You'll be notified once it's approved &amp; the final bill is ready.</p>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;width:100%;">
+            <div class="line-item"><span>Items</span><span>3</span></div>
+            <div class="line-item"><span>Delivery</span><span>Home · Today 5–7 PM</span></div>
+            <div class="line-item total"><span>Estimated</span><span>₹838</span></div>
+          </div>
+          <button class="btn">Track Order</button>
+          <button class="btn ghost">Continue Shopping</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 8. TRACK ORDER -->
+    <div class="stage">
+      <div class="step-tag">8 · Track order status</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">Order #TT1042</div></div>
+        <div class="body scroll" style="gap:16px;">
+          <div class="steps">
+            <div class="stepline"><div class="marks"><div class="m">✓</div><div class="bar"></div></div><div class="txt"><h5>Order Placed</h5><small>Today, 9:41 AM</small></div></div>
+            <div class="stepline"><div class="marks"><div class="m">✓</div><div class="bar"></div></div><div class="txt"><h5>Approved by Shop</h5><small>Final bill ₹852 · 9:52 AM</small></div></div>
+            <div class="stepline"><div class="marks"><div class="m">✓</div><div class="bar pending"></div></div><div class="txt"><h5>Out for Delivery</h5><small>Reaching by 6 PM</small></div></div>
+            <div class="stepline"><div class="marks"><div class="m pending">4</div></div><div class="txt"><h5 style="color:var(--muted)">Delivered</h5><small>Pending</small></div></div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;">
+            <div class="line-item"><span>Toor Dal 1kg × 2</span><span>₹290</span></div>
+            <div class="line-item"><span>Basmati Rice 5kg</span><span>₹520</span></div>
+            <div class="line-item"><span>Rock Salt 1kg</span><span>₹28</span></div>
+            <div class="line-item"><span>Loose weight adj.</span><span>₹14</span></div>
+            <div class="line-item total"><span>Final Bill</span><span>₹852</span></div>
+          </div>
+          <button class="btn">Pay ₹852 via UPI</button>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= ADMIN FLOW ================= -->
+<section class="flow" id="flow-admin">
+  <div class="intro">
+    <h2>Admin Journey — you, your brother &amp; father</h2>
+    <p>Multiple admins can log in. You get instant notifications of new orders, review &amp; approve items, adjust prices/quantities, read uploaded handwritten lists, and manage your products &amp; stock.</p>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--saffron)"></i>Action needed</span>
+      <span><i class="dot" style="background:var(--green)"></i>Approved</span>
+      <span><i class="dot" style="background:#e53935"></i>New / urgent</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- A1. ADMIN LOGIN -->
+    <div class="stage">
+      <div class="step-tag">1 · Admin login</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="body" style="justify-content:center;text-align:center;gap:18px;">
+          <div class="logo-big" style="background:linear-gradient(135deg,var(--ink),#3a3f47)">TT</div>
+          <div><h2 style="font-size:19px;">Admin Panel</h2><p style="color:var(--muted);font-size:12.5px;margin-top:4px;">Tirupati Traders · Staff Login</p></div>
+          <div class="field" style="text-align:left;"><span class="lab">MOBILE / STAFF ID</span><span>+91 90000 11111</span></div>
+          <div class="field" style="text-align:left;"><span class="lab">PASSWORD</span><span>••••••••</span></div>
+          <button class="btn dark">Login as Admin</button>
+          <p style="font-size:10.5px;color:var(--muted);">3 admins active: Father · You · Brother</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A2. DASHBOARD -->
+    <div class="stage">
+      <div class="step-tag">2 · Dashboard</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar"><div><div class="sub">Welcome back</div><div class="ttl">Dashboard</div></div><div class="icon-btn" style="margin-left:auto;">🔔<span style="position:absolute;margin:-8px 0 0 8px;" class="newtag">3</span></div></div>
+        <div class="body scroll">
+          <div class="grid2">
+            <div class="stat"><b>₹18,240</b><small>Today's Sales</small></div>
+            <div class="stat"><b>24</b><small>Orders Today</small></div>
+            <div class="stat"><b style="color:#e53935">3</b><small>Need Approval</small></div>
+            <div class="stat"><b style="color:var(--saffron-dark)">5</b><small>Out for Delivery</small></div>
+          </div>
+          <div class="label" style="margin-top:4px;">New Orders</div>
+          <div class="order-card"><div class="top"><div><h4>#TT1042 · Ramesh K.</h4><small>3 items · Home delivery · UPI</small></div><span class="newtag">NEW</span></div>
+            <div style="display:flex;gap:8px;margin-top:10px;"><button class="btn" style="padding:9px;font-size:12px;">Review</button></div></div>
+          <div class="order-card"><div class="top"><div><h4>#TT1041 · Sunita D.</h4><small>📸 Uploaded list · Pickup</small></div><span class="newtag">NEW</span></div>
+            <div style="display:flex;gap:8px;margin-top:10px;"><button class="btn" style="padding:9px;font-size:12px;">Read List</button></div></div>
+        </div>
+        <div class="bottomnav">
+          <div class="on"><span class="ic">📊</span>Home</div>
+          <div><span class="ic">📋</span>Orders</div>
+          <div><span class="ic">📦</span>Products</div>
+          <div><span class="ic">⚙️</span>Settings</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A3. REVIEW & APPROVE ORDER -->
+    <div class="stage">
+      <div class="step-tag">3 · Review &amp; approve order</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">#TT1042 · Ramesh</div><span class="pill pend">PENDING</span></div>
+        <div class="body scroll">
+          <p style="font-size:11.5px;color:var(--muted);">Tick items you can supply. Adjust qty/price for loose items, then approve.</p>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;">
+            <div class="adm-item"><div class="check">✓</div><div><b>Toor Dal</b><br><small style="color:var(--muted)">2 kg</small></div><div class="qtybox"><input value="₹290"/></div></div>
+            <div class="adm-item"><div class="check">✓</div><div><b>Basmati Rice</b><br><small style="color:var(--muted)">5 kg</small></div><div class="qtybox"><input value="₹520"/></div></div>
+            <div class="adm-item"><div class="check off">✓</div><div style="opacity:.55"><b>Rock Salt</b><br><small style="color:var(--muted)">out of stock</small></div><div class="qtybox"><input value="₹28" disabled/></div></div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;">
+            <div class="line-item"><span>Approved items</span><span>2 of 3</span></div>
+            <div class="line-item total"><span>Final Bill</span><span>₹810</span></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn ghost" style="flex:1;">Message</button>
+            <button class="btn green" style="flex:2;">Approve &amp; Send</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A4. READ UPLOADED LIST -->
+    <div class="stage">
+      <div class="step-tag">4 · Read uploaded list</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">#TT1041 · Sunita</div><span class="pill pend">LIST</span></div>
+        <div class="body scroll">
+          <div class="label">Customer's handwritten list</div>
+          <div class="note-img">Toor dal – 2 kg<br>Chawal – 5 kg<br>Chini – 1 kg<br>Chai patti – 250 g<br>Haldi – 100 g</div>
+          <p style="font-size:11px;color:var(--muted);">🗒️ Note: "Please give fresh toor dal 🙏"</p>
+          <div class="label">Build the order</div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px;">
+            <div class="adm-item"><div class="check">✓</div><div><b>Toor Dal</b> · 2 kg</div><div class="qtybox"><input value="₹290"/></div></div>
+            <div class="adm-item"><div class="check">✓</div><div><b>Basmati Rice</b> · 5 kg</div><div class="qtybox"><input value="₹520"/></div></div>
+            <div class="adm-item"><div class="check">✓</div><div><b>Sugar</b> · 1 kg</div><div class="qtybox"><input value="₹45"/></div></div>
+            <div style="text-align:center;padding:8px 0;color:var(--saffron-dark);font-size:12px;font-weight:700;">+ Add more items</div>
+          </div>
+          <button class="btn green">Send Bill (₹855) to Customer</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A5. PRODUCT MANAGEMENT -->
+    <div class="stage">
+      <div class="step-tag">5 · Manage products &amp; stock</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar"><div class="ttl">Products (68)</div><div class="icon-btn" style="margin-left:auto;">＋</div></div>
+        <div class="body scroll">
+          <div class="search">🔍 Search product…</div>
+          <div class="prod"><div class="thumb">🫘</div><div class="info"><h4>Toor Dal</h4><small>1 kg · ₹145</small></div><div class="toggle"></div></div>
+          <div class="prod"><div class="thumb">🌾</div><div class="info"><h4>Basmati Rice</h4><small>5 kg · ₹520</small></div><div class="toggle"></div></div>
+          <div class="prod"><div class="thumb">🧂</div><div class="info"><h4>Rock Salt</h4><small>1 kg · ₹28</small></div><div class="toggle"></div></div>
+          <div class="prod"><div class="thumb">🛢️</div><div class="info"><h4>Mustard Oil</h4><small>1 L · ₹190</small></div><div class="toggle off"></div></div>
+          <p style="text-align:center;font-size:10.5px;color:var(--muted);">Green = In stock · Grey = Hidden from customers</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A6. EDIT PRODUCT / PRICE -->
+    <div class="stage">
+      <div class="step-tag">6 · Edit product &amp; price</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar plain"><div class="icon-btn">‹</div><div class="ttl">Edit Product</div></div>
+        <div class="body scroll" style="gap:12px;">
+          <div style="width:80px;height:80px;border-radius:16px;background:var(--green-light);display:grid;place-items:center;font-size:38px;margin:0 auto;">🫘</div>
+          <div class="field"><span class="lab">NAME</span><span>Toor Dal (Arhar)</span></div>
+          <div class="grid2">
+            <div class="field"><span class="lab">UNIT</span><span>1 kg</span></div>
+            <div class="field"><span class="lab">CATEGORY</span><span>Dal</span></div>
+          </div>
+          <div class="field" style="border-color:var(--saffron);"><span class="lab" style="color:var(--saffron-dark)">PRICE (₹) — update anytime</span><span style="font-size:16px;font-weight:800;">145</span></div>
+          <div class="opt"><div>In Stock</div><div class="toggle" style="margin-left:auto;"></div></div>
+          <button class="btn">Save Changes</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A7. ORDERS LIST -->
+    <div class="stage">
+      <div class="step-tag">7 · All orders</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="appbar"><div class="ttl">Orders</div></div>
+        <div class="body scroll">
+          <div class="cats"><div class="chip on">All</div><div class="chip">Pending</div><div class="chip">Approved</div><div class="chip">Delivered</div></div>
+          <div class="order-card"><div class="top"><div><h4>#TT1042 · Ramesh</h4><small>₹810 · UPI · Home</small></div><span class="pill pend">Pending</span></div></div>
+          <div class="order-card"><div class="top"><div><h4>#TT1040 · Anil</h4><small>₹1,240 · Cash · Pickup</small></div><span class="pill appr">Approved</span></div></div>
+          <div class="order-card"><div class="top"><div><h4>#TT1039 · Meena</h4><small>₹560 · UPI · Home</small></div><span class="pill deliv">Out for delivery</span></div></div>
+          <div class="order-card"><div class="top"><div><h4>#TT1038 · Kishore</h4><small>₹2,100 · Cash · Home</small></div><span class="pill appr">Completed</span></div></div>
+        </div>
+        <div class="bottomnav">
+          <div><span class="ic">📊</span>Home</div>
+          <div class="on"><span class="ic">📋</span>Orders</div>
+          <div><span class="ic">📦</span>Products</div>
+          <div><span class="ic">⚙️</span>Settings</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- A8. NOTIFICATION -->
+    <div class="stage">
+      <div class="step-tag">8 · Instant notification</div>
+      <div class="phone"><div class="notch"></div><div class="screen" style="background:linear-gradient(160deg,#20242b,#3a3f47);">
+        <div class="statusbar" style="color:#fff;"><span>9:41</span><span class="r">▂▄▆ 5G 100%</span></div>
+        <div class="body" style="justify-content:flex-start;gap:14px;padding-top:24px;">
+          <p style="color:#c9cdd4;font-size:11px;text-align:center;">Monday, 10 Sept</p>
+          <p style="color:#fff;font-size:42px;text-align:center;font-weight:300;">9:41</p>
+          <div style="background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border-radius:18px;padding:14px;color:#fff;display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:40px;height:40px;border-radius:11px;background:var(--saffron);display:grid;place-items:center;font-weight:800;">TT</div>
+            <div><div style="display:flex;justify-content:space-between;"><b style="font-size:13px;">Tirupati Traders</b><small style="opacity:.7;">now</small></div>
+            <p style="font-size:12.5px;margin-top:3px;">🛒 New order #TT1042 from Ramesh — 3 items, ₹838. Tap to review &amp; approve.</p></div>
+          </div>
+          <div style="background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border-radius:18px;padding:14px;color:#fff;display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:40px;height:40px;border-radius:11px;background:var(--saffron);display:grid;place-items:center;font-weight:800;">TT</div>
+            <div><div style="display:flex;justify-content:space-between;"><b style="font-size:13px;">Tirupati Traders</b><small style="opacity:.7;">2m</small></div>
+            <p style="font-size:12.5px;margin-top:3px;">📸 Sunita uploaded a handwritten list. Tap to read &amp; prepare.</p></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <b>Tirupati Traders — Interactive Prototype (Firebase + Flutter)</b><br>
+  These are visual mockups only, to review the design &amp; flow. Colours, text and layout can all be changed before development.
+</footer>
+
+<script>
+  function showFlow(which){
+    document.getElementById('flow-cust').classList.toggle('active', which==='cust');
+    document.getElementById('flow-admin').classList.toggle('active', which==='admin');
+    document.getElementById('tab-cust').classList.toggle('active', which==='cust');
+    document.getElementById('tab-admin').classList.toggle('active', which==='admin');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>

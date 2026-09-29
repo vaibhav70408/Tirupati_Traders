@@ -1,0 +1,28 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "tirupati-traders-jwalapur",
+          "appId": "1:464373080105:android:bf4b0c445d6f686a7fbc38",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "tirupati-traders-jwalapur",
+          "configurations": {
+            "android": "1:464373080105:android:bf4b0c445d6f686a7fbc38",
+            "ios": "1:464373080105:ios:5f6674d1622b87b07fbc38"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default"
+    }
+  ]
+}
